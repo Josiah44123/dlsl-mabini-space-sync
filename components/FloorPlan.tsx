@@ -7,87 +7,148 @@ interface FloorPlanProps {
   onRoomClick: (room: Room) => void;
 }
 
-const getStatusStyles = (room: Room) => {
+
+const getStudentStatusStyles = (room: Room) => {
   switch (room.computedStatus) {
     case 'occupied':
-      return 'bg-red-500 border-red-600 text-white hover:bg-red-600 shadow-red-200';
+      return 'bg-red-500 border-red-600 text-white hover:bg-red-600 shadow-red-200 cursor-pointer';
     case 'reserved':
-      return 'bg-yellow-400 border-yellow-500 text-yellow-900 hover:bg-yellow-500 shadow-yellow-200';
+      return 'bg-yellow-400 border-yellow-500 text-yellow-900 hover:bg-yellow-500 shadow-yellow-200 cursor-pointer';
     case 'free':
-      return 'bg-emerald-400 border-emerald-500 text-white hover:bg-emerald-500 shadow-emerald-200';
+      return 'bg-emerald-400 border-emerald-500 text-white hover:bg-emerald-500 shadow-emerald-200 cursor-pointer';
     default:
-      return 'bg-gray-200 border-gray-300 text-gray-500';
+      return 'bg-gray-200 border-gray-300 text-gray-500 cursor-pointer';
   }
 };
+
+
+const OFFICE_STYLE = "bg-slate-700 border-slate-800 text-gray-100 shadow-xl cursor-not-allowed";
 
 interface RoomCardProps {
   room: Room;
   onClick: (room: Room) => void;
+  variant?: 'student' | 'office'; 
+  customName?: string; 
 }
 
-const RoomCard: React.FC<RoomCardProps> = ({ room, onClick }) => (
-  <button
-    onClick={() => onClick(room)}
-    className={`relative group flex flex-col items-center justify-center h-32 md:h-40 rounded-xl border-b-4 shadow-lg transition-all transform hover:-translate-y-1 hover:shadow-xl w-full p-2 ${getStatusStyles(room)}`}
-  >
-    <span className="text-lg md:text-xl font-bold tracking-tight">{room.name}</span>
-    <span className="text-xs opacity-90 font-medium uppercase tracking-wider mt-1">
-      {room.computedStatus}
-    </span>
-    
-    {/* Occupancy Indicator */}
-    {room.computedStatus === 'occupied' && (
-      <span className="absolute top-2 right-2 flex h-3 w-3">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-      </span>
-    )}
-
-    {/* Hover Info */}
-    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity flex items-center justify-center">
-      <span className="text-xs bg-white text-gray-900 px-2 py-1 rounded shadow font-semibold">
-         Details
-      </span>
-    </div>
-  </button>
-);
-
-const FloorPlan: React.FC<FloorPlanProps> = ({ floorNumber, rooms, onRoomClick }) => {
-  // We'll simulate a corridor layout:
-  // Top row: rooms 1-6
-  // Corridor
-  // Bottom row: rooms 7-12
-  
-  const topRooms = rooms.slice(0, 6);
-  const bottomRooms = rooms.slice(6, 12);
+const RoomCard: React.FC<RoomCardProps> = ({ room, onClick, variant = 'student', customName }) => {
+  const isOffice = variant === 'office';
+  const styles = isOffice ? OFFICE_STYLE : getStudentStatusStyles(room);
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-8 bg-white rounded-3xl shadow-sm border border-gray-100">
+    <div
+      onClick={() => !isOffice && onClick(room)} 
+      className={`relative flex flex-col items-center justify-center rounded-xl border-b-[6px] shadow-lg transition-all transform w-full p-3 
+        ${isOffice ? '' : 'hover:-translate-y-1 hover:shadow-xl active:border-b-2 active:translate-y-1'} 
+        ${styles}
+        ${isOffice ? 'h-32 md:h-40 max-w-md' : 'h-24 md:h-32'} 
+      `}
+    >
+      {}
+      <span className={`font-bold tracking-tight ${isOffice ? 'text-3xl' : 'text-lg'}`}>
+        {customName || room.name}
+      </span>
+      
+      {}
+      <span className={`text-xs font-medium uppercase tracking-wider mt-1 ${isOffice ? 'text-slate-400' : 'opacity-90'}`}>
+        {isOffice ? 'Admin / Office' : room.computedStatus}
+      </span>
+      
+      {}
+      {isOffice && (
+        <div className="absolute top-3 right-3 text-slate-500">
+           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+             <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+           </svg>
+        </div>
+      )}
+
+      {}
+      {!isOffice && room.computedStatus === 'occupied' && (
+        <span className="absolute top-2 right-2 flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+        </span>
+      )}
+    </div>
+  );
+};
+
+const FloorPlan: React.FC<FloorPlanProps> = ({ floorNumber, rooms, onRoomClick }) => {
+  
+ 
+  const topRoom = rooms.length > 0 ? rooms[0] : null;
+  const bottomRoom = rooms.length > 1 ? rooms[rooms.length - 1] : null;
+  const middleRooms = rooms.slice(1, rooms.length - 1);
+  
+  
+  const halfPoint = Math.ceil(middleRooms.length / 2);
+  const leftWing = middleRooms.slice(0, halfPoint);
+  const rightWing = middleRooms.slice(halfPoint);
+
+  return (
+    <div className="max-w-5xl mx-auto p-4 md:p-8 bg-gray-50 min-h-screen flex flex-col items-center">
         
-        <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-bold text-gray-700">Floor {floorNumber} Layout</h3>
-            <div className="flex gap-4 text-xs font-medium text-gray-500">
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-400 rounded-full"></div> Available</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full"></div> Occupied</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-yellow-400 rounded-full"></div> Reserved</div>
+        {}
+        <div className="w-full flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
+            <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">
+                Level {floorNumber}
+            </h2>
+            <div className="text-xs text-gray-400 font-medium">
+                North Wing Building
             </div>
         </div>
 
-        <div className="space-y-8 relative">
-            {/* Top Row */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {topRooms.map(room => <RoomCard key={room.id} room={room} onClick={onRoomClick} />)}
+        <div className="w-full flex flex-col gap-8">
+            
+            {}
+            <div className="flex justify-center items-center w-full">
+                {topRoom && (
+                   <RoomCard 
+                       room={topRoom} 
+                       onClick={onRoomClick} 
+                       variant="office"
+                     
+                       customName={`MB ${floorNumber}00`} 
+                    />
+                )}
             </div>
 
-            {/* Corridor Visualization */}
-            <div className="h-16 flex items-center justify-center bg-gray-50 rounded-lg border-x-2 border-dashed border-gray-200 mx-4">
-                <span className="text-gray-300 font-bold tracking-[1em] uppercase text-sm">Corridor</span>
+            {}
+            <div className="flex flex-row justify-between w-full gap-4 md:gap-8">
+                
+                {}
+                <div className="flex-1 flex flex-col gap-4">
+                    {leftWing.map(room => (
+                        <RoomCard key={room.id} room={room} onClick={onRoomClick} variant="student" />
+                    ))}
+                </div>
+
+                {}
+                <div className="hidden md:flex flex-col items-center justify-center w-16 opacity-30">
+                    <div className="h-full border-l-2 border-r-2 border-dashed border-gray-400 w-full"></div>
+                </div>
+
+                {}
+                <div className="flex-1 flex flex-col gap-4">
+                    {rightWing.map(room => (
+                        <RoomCard key={room.id} room={room} onClick={onRoomClick} variant="student" />
+                    ))}
+                </div>
             </div>
 
-            {/* Bottom Row */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {bottomRooms.map(room => <RoomCard key={room.id} room={room} onClick={onRoomClick} />)}
+            {}
+            <div className="flex justify-center items-center w-full">
+                {bottomRoom && (
+                   <RoomCard 
+                       room={bottomRoom} 
+                       onClick={onRoomClick} 
+                       variant="office"
+                       customName={`Utility / Exit`} 
+                    />
+                )}
             </div>
+
         </div>
     </div>
   );

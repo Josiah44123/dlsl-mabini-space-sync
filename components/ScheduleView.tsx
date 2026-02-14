@@ -16,13 +16,12 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ schedules }) => {
     const [startH, startM] = start.split(':').map(Number);
     const [endH, endM] = end.split(':').map(Number);
     
-    // Grid starts at 8:00 (row 1). Each hour is 60px height.
-    // 08:00 is 0 minutes offset from start.
+   
     const startOffsetMinutes = (startH - 8) * 60 + startM;
     const durationMinutes = (endH * 60 + endM) - (startH * 60 + startM);
     
     return {
-      top: `${(startOffsetMinutes / 60) * 4}rem`, // 4rem = h-16 = 64px approx
+      top: `${(startOffsetMinutes / 60) * 4}rem`, 
       height: `${(durationMinutes / 60) * 4}rem`,
     };
   };
