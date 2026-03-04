@@ -1,0 +1,5 @@
+{
+  "name": "DLSL Mabini Space-Sync",
+  "description": "A campus space management dashboard for the Mabini Building at DLSL, featuring interactive floor plans, real-time room status, and schedule management.",
+  "requestFramePermissions": []
+}
