@@ -7,7 +7,7 @@ interface FloorPlanProps {
   onRoomClick: (room: Room) => void;
 }
 
-
+//add label for office and utility rooms
 const getStudentStatusStyles = (room: Room) => {
   switch (room.computedStatus) {
     case 'occupied':
