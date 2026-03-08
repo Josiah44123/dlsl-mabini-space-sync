@@ -21,7 +21,7 @@ const getStudentStatusStyles = (room: Room) => {
   }
 };
 
-
+//add office style with lock icon and disable click
 const OFFICE_STYLE = "bg-slate-700 border-slate-800 text-gray-100 shadow-xl cursor-not-allowed";
 
 interface RoomCardProps {
